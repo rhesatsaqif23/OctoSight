@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, Bell, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,11 +15,13 @@ const navLinks = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
+
     <nav className="sticky top-0 z-50 w-full bg-white shadow-sm backdrop-blur-md">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 md:h-16 items-center justify-between">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 md:py-6">
+        <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex shrink-0 items-center">
             <Link href="/" className="text-xl md:text-2xl font-extrabold text-primary">
@@ -29,15 +32,23 @@ export const Navbar = () => {
           {/* Desktop Menu - Centered */}
           <div className="hidden flex-1 md:flex justify-center">
             <div className="flex items-baseline space-x-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-base font-semibold text-gray-700 transition-colors hover:text-primary"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href || (pathname.startsWith(link.href + "/") && link.href !== "/");
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={cn(
+                      "text-base font-semibold transition-colors hover:text-primary py-1 border-b-2",
+                      isActive
+                        ? "text-primary border-primary"
+                        : "text-gray-700 border-transparent"
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
           </div>
 
@@ -64,18 +75,26 @@ export const Navbar = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={cn("md:hidden", isOpen ? "block" : "hidden")}>
-        <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3 bg-white border-b">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="block rounded-md px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.name}
-            </Link>
-          ))}
+      <div className={cn("md:hidden absolute top-full left-0 w-full bg-white shadow-lg", isOpen ? "block" : "hidden")}>
+        <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (pathname.startsWith(link.href + "/") && link.href !== "/");
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={cn(
+                  "block rounded-md px-3 py-2 text-base font-medium transition-colors",
+                  isActive
+                    ? "bg-red-50 text-primary border-l-4 border-primary"
+                    : "text-gray-700 hover:bg-gray-50 hover:text-primary border-l-4 border-transparent"
+                )}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </nav>

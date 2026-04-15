@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "outline" | "ghost" | "secondary";
   size?: "sm" | "md" | "lg";
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -11,15 +13,17 @@ export const Button = ({
   variant = "primary",
   size = "md",
   className,
+  leftIcon,
+  rightIcon,
   children,
   ...props
 }: ButtonProps) => {
-  const baseStyles = "inline-flex items-center justify-center rounded-2xl font-bold transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
+  const baseStyles = "inline-flex items-center justify-center rounded-2xl font-bold transition-all focus:outline-none disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
 
   const variants = {
     primary: "bg-primary text-white hover:bg-red-800 shadow-md",
     outline: "border-2 border-primary text-primary hover:bg-primary/5",
-    secondary: "bg-[#E8E8E8] text-gray-800 hover:bg-[#D8D8D8]",
+    secondary: "bg-[#E8E8E8] text-gray-900 hover:bg-[#D8D8D8]",
     ghost: "text-gray-600 hover:bg-gray-100",
   };
 
@@ -34,7 +38,9 @@ export const Button = ({
       className={cn(baseStyles, variants[variant], sizes[size], className)}
       {...props}
     >
+      {leftIcon && <span className="mr-2">{leftIcon}</span>}
       {children}
+      {rightIcon && <span className="ml-2">{rightIcon}</span>}
     </button>
   );
 };
