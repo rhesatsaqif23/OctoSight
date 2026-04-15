@@ -1,14 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Check, Copy, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { useDispatch } from "react-redux";
+import { resetReport } from "@/modules/report/reportSlice";
+import { useFileContext } from "@/lib/FileContext";
 
 export default function LaporSuccessPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { setEvidenceFile } = useFileContext();
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    // Clear all persisted state on success mount
+    localStorage.removeItem("octosight_report_data");
+    setEvidenceFile(null);
+    dispatch(resetReport());
+  }, [dispatch, setEvidenceFile]);
   const ticketId = "#OCT-2024-00847"; // Dynamic normally
 
   const handleCopy = () => {

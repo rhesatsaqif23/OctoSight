@@ -14,10 +14,9 @@ import {
   Mail,
   Phone,
   Globe,
-  CreditCard
+  CreditCard,
+  Loader2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-
 import { RiskScoreCard } from "@/components/report/RiskScoreCard";
 
 interface Step4Props {
@@ -34,20 +33,29 @@ const REPORT_TYPE_LABELS: Record<string, { label: string; icon: any; identifierL
   phone: { label: "Panggilan Penipuan", icon: Phone, identifierLabel: "No. Telepon" },
 };
 
+/** Determine risk label from score (3-level, VT result) */
+const getRiskStatus = (score: number): string => {
+  if (score >= 70) return "HIGH RISK";
+  if (score >= 40) return "MEDIUM RISK";
+  return "LOW RISK";
+};
+
 export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props) => {
   const { formData } = useSelector((state: RootState) => state.report);
 
-  // Helper to format date
+  // riskScore is populated by Step3Evidence's background VT scan (or null if scan is still running)
+  const riskScore = formData.riskScore;
+  const isScanning = formData.url !== "" && riskScore === null;
+
   const formatDate = (dateStr: string) => {
     if (!dateStr) return "-";
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString("id-ID", {
+      return new Date(dateStr).toLocaleDateString("id-ID", {
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
-    } catch (e) {
+    } catch {
       return dateStr;
     }
   };
@@ -55,12 +63,10 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
   const typeConfig = REPORT_TYPE_LABELS[formData.type] || {
     label: formData.type || "Laporan",
     icon: AlertTriangle,
-    identifierLabel: "Detail"
+    identifierLabel: "Detail",
   };
-
   const TypeIcon = typeConfig.icon;
 
-  // Primary identifier display (URL, Phone, Email, etc.)
   const getIdentifierValue = () => {
     if (formData.type === "website") return formData.url;
     if (formData.type === "whatsapp_sms" || formData.type === "phone") return formData.phone;
@@ -69,8 +75,8 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
     return formData.subject || "-";
   };
 
-  const riskScore = 75; // Mocked for now (as requested)
-  const riskStatus = "HIGH RISK";
+  // Fallback score display when no URL is present (no VT scan applicable)
+  const displayScore = riskScore ?? 0;
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-xl overflow-hidden">
@@ -103,11 +109,11 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
               <div className="p-2.5 rounded-full bg-primary/5 text-primary">
                 <LinkIcon className="size-5" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-0.5">
                   {typeConfig.identifierLabel}
                 </p>
-                <p className="text-base md:text-lg font-semibold text-[#1A1A1A]">
+                <p className="text-base md:text-lg font-semibold text-[#1A1A1A] truncate">
                   {getIdentifierValue()}
                 </p>
               </div>
@@ -129,17 +135,27 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
             </div>
           </div>
 
-          {/* Right Side: Risk Score Card Component */}
-          <RiskScoreCard
-            score={riskScore}
-            status={riskStatus}
-          />
+          {/* Right Side: Risk Score Card / Loading State */}
+          {isScanning ? (
+            <div className="bg-white rounded-3xl p-8 border-2 border-gray-100 flex flex-col items-center justify-center text-center h-full lg:min-h-[260px] gap-4">
+              <Loader2 className="size-12 animate-spin text-primary" />
+              <p className="text-sm font-bold text-gray-500 tracking-wide animate-pulse">
+                Memindai URL dengan VirusTotal...
+              </p>
+            </div>
+          ) : (
+            <RiskScoreCard
+              score={displayScore}
+              status={getRiskStatus(displayScore)}
+            />
+          )}
         </div>
+
 
         {/* Divider */}
         <div className="my-8 h-px bg-gray-200" />
 
-        {/* Disclaimer Section - No background per request */}
+        {/* Disclaimer Section */}
         <div className="flex items-center gap-3 px-2 mb-12">
           <div className="shrink-0 flex items-center justify-center">
             <Info className="size-5 text-primary" />
@@ -155,10 +171,13 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
             size="md"
             className="w-full max-w-lg rounded-2xl text-lg font-bold shadow-lg shadow-primary/20"
             onClick={onSubmit}
-            disabled={isSubmitting}
-            rightIcon={<Send className="size-4" />}
+            disabled={isSubmitting || isScanning}
+            rightIcon={isSubmitting
+              ? <Loader2 className="size-4 animate-spin" />
+              : <Send className="size-4" />
+            }
           >
-            Kirim Laporan
+            {isSubmitting ? "Mengirim Laporan..." : "Kirim Laporan"}
           </Button>
 
           <button
@@ -172,3 +191,4 @@ export const Step4Confirmation = ({ onBack, onSubmit, isSubmitting }: Step4Props
     </div>
   );
 };
+

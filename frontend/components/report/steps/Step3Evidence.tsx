@@ -16,7 +16,32 @@ interface Step3Props {
 
 export const Step3Evidence = ({ onNext, onBack, initialData }: Step3Props) => {
   const dispatch = useDispatch();
-  const { evidenceName } = useSelector((state: RootState) => state.report.formData);
+  const { evidenceName, url, riskScore } = useSelector((state: RootState) => state.report.formData);
+
+  // --- Background VT scan: runs silently while user uploads evidence ---
+  useEffect(() => {
+    // Only scan if URL is present and score not yet cached
+    if (!url || riskScore !== null) return;
+
+    const runBackgroundScan = async () => {
+      try {
+        const res = await fetch("/api/vt-scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const score: number = typeof data.score === "number" ? data.score : 0;
+        dispatch(updateFormData({ riskScore: score }));
+      } catch {
+        // Silent fail — Step4 will handle its own fallback
+      }
+    };
+
+    runBackgroundScan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [file, setFile] = useState<File | null>(initialData?.evidence || null);
   const [preview, setPreview] = useState<string | null>(null);

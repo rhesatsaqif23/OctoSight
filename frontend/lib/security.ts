@@ -8,8 +8,8 @@ import { z } from "zod";
 export const sanitizeInput = (input: string): string => {
   if (!input) return "";
 
-  // 1. Basic trimming
-  let sanitized = input.trim();
+  // 1. No aggressive trimming during typing (allows spaces)
+  let sanitized = input;
 
   // 2. XSS Prevention: Strip HTML tags
   sanitized = sanitized.replace(/<[^>]*>?/gm, "");

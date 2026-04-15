@@ -14,6 +14,7 @@ interface ReportState {
     details: string;
     date: string;
     evidenceName: string | null;
+    riskScore: number | null;
   };
 }
 
@@ -31,6 +32,7 @@ const initialState: ReportState = {
     details: "",
     date: "",
     evidenceName: null,
+    riskScore: null,
   },
 };
 

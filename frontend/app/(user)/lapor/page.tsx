@@ -3,7 +3,9 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/lib/store";
-import { setStep, updateFormData, hydrateReport, resetReport } from "@/modules/report/reportSlice";
+import { useRouter } from "next/navigation";
+import { useFileContext } from "@/lib/FileContext";
+import { setStep, updateFormData } from "@/modules/report/reportSlice";
 import { Stepper } from "@/components/ui/Stepper";
 import { Step1ReportType } from "@/components/report/steps/Step1ReportType";
 import { Step2Details } from "@/components/report/steps/Step2Details";
@@ -36,10 +38,9 @@ const STEP_CONTENT = {
   },
 };
 
-import { useFileContext } from "@/lib/FileContext";
-
 // ... inside LaporPage
 export default function LaporPage() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const { currentStep, formData } = useSelector((rootState: RootState) => rootState.report);
   const { evidenceFile, setEvidenceFile } = useFileContext();
@@ -73,13 +74,9 @@ export default function LaporPage() {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setIsSubmitting(false);
 
-    // Clear persistence and reset Redux state on success
-    localStorage.removeItem("octosight_report_data");
-    setEvidenceFile(null);
-    dispatch(resetReport());
-
     // Redirect to the success page
-    window.location.href = "/lapor/success";
+    // Note: Cleanup is handled in the SuccessPage's useEffect to avoid flashing Step 1 here
+    router.push("/lapor/success");
   };
 
   const currentInfo = STEP_CONTENT[currentStep as keyof typeof STEP_CONTENT] || STEP_CONTENT[1];
