@@ -1,5 +1,6 @@
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "../ui/Button";
 import { ShieldCheck } from "lucide-react";
 
@@ -10,7 +11,7 @@ export const Hero = () => {
         <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-center">
           {/* Text Content */}
           <div className="sm:text-center md:mx-auto md:max-w-2xl lg:col-span-6 lg:text-left">
-            <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm md:text-md font-bold text-primary mb-6 ring-1 ring-inset ring-red-600/10">
+            <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm md:text-base font-bold text-primary mb-6 ring-1 ring-inset ring-red-600/10">
               <ShieldCheck className="size-5" />
               AMANKAN IDENTITAS DIGITAL ANDA
             </span>
@@ -19,15 +20,17 @@ export const Hero = () => {
               <span className="block text-primary">Phishing & Penipuan</span>
               <span className="block text-gray-900">dengan OctoSight</span>
             </h1>
-            <p className="mt-6 text-md md:not-last-of-type:text-lg text-gray-600 sm:text-xl md:max-w-xl leading-relaxed">
+            <p className="mt-6 text-base md:not-last-of-type:text-lg text-gray-600 sm:text-xl md:max-w-xl leading-relaxed">
               Sistem proaktif untuk mendeteksi, melaporkan, dan mencegah
               penipuan digital secara real-time. Keamanan presisi untuk web
               modern.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-4">
-              <Button variant="primary" size="lg">
-                Laporkan Phishing
-              </Button>
+              <Link href="/lapor">
+                <Button variant="primary" size="lg">
+                  Laporkan Phishing
+                </Button>
+              </Link>
               <Button variant="secondary" size="lg">
                 Cek Keamanan Link
               </Button>
